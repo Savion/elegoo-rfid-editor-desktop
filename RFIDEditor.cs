@@ -154,9 +154,11 @@ namespace RFIDEditor
                     row.Cells["description"].Style.Font = new Font(pageGrid.Font, FontStyle.Italic);
 
                     // Color code important field types
-                    if (i >= 0x48 && i <= 0x4B) // Material
+                    if (i >= 0x45 && i <= 0x46) // Filament Code
+                        row.DefaultCellStyle.BackColor = Color.FromArgb(255, 255, 240); // Light yellow
+                    else if (i >= 0x48 && i <= 0x4B) // Material Name
                         row.DefaultCellStyle.BackColor = Color.FromArgb(255, 250, 240); // Light orange
-                    else if (i >= 0x4C && i <= 0x4D) // Subtype
+                    else if (i >= 0x4C && i <= 0x4D) // Material Supplement
                         row.DefaultCellStyle.BackColor = Color.FromArgb(255, 250, 230); // Lighter orange
                     else if (i >= 0x50 && i <= 0x52) // RGB Color
                         row.DefaultCellStyle.BackColor = Color.FromArgb(240, 255, 240); // Light green
@@ -184,18 +186,18 @@ namespace RFIDEditor
             if (i > 0x6A && i <= 0x9F) return "";
 
             if (i >= 0x1C && i <= 0x25) return "Marketing URL";
-            if (i == 0x40) return "Header (EPC-256)";
+            if (i == 0x40) return "Header";
             if (i >= 0x41 && i <= 0x44) return "Manufacturer Code";
             if (i >= 0x45 && i <= 0x46) return "Filament Code";
-            if (i >= 0x48 && i <= 0x4B) return "Material (Main)";
-            if (i >= 0x4C && i <= 0x4F) return "Material (Subtype)";
-            if (i >= 0x50 && i <= 0x52) return "Color Code (RGB)";
-            if (i == 0x53) return "Color Modifier (L/M/D)";
+            if (i >= 0x48 && i <= 0x4B) return "Material Name";
+            if (i >= 0x4C && i <= 0x4D) return "Material Supplement";
+            if (i >= 0x50 && i <= 0x52) return "Color Code";
+            if (i == 0x53) return "Color Modifier";
             if (i == 0x54 || i == 0x55) return "Min Temp";
             if (i == 0x56 || i == 0x57) return "Max Temp";
             if (i == 0x5C || i == 0x5D) return "Filament Diameter";
-            if (i == 0x5E || i == 0x5F) return "Filament Weight (g)";
-            if (i == 0x60 || i == 0x61) return "Production Date (YYMM)";
+            if (i == 0x5E || i == 0x5F) return "Filament Weight";
+            if (i == 0x60 || i == 0x61) return "Production Date";
             if (i >= 0xA0 && i <= 0xAF) return "Config/Password";
 
             return "Reserved/Data";
@@ -220,8 +222,8 @@ namespace RFIDEditor
                 txtDiameter.Text = ((_rawData[0x5C] << 8) | _rawData[0x5D]).ToString();
                 txtWeightInput.Text = ((_rawData[0x5E] << 8) | _rawData[0x5F]).ToString();
 
-                // 3. Production Date (YYMM format)
-                txtProdDate.Text = ((_rawData[0x60] << 8) | _rawData[0x61]).ToString("D4");
+                // 3. Production Date (hex-BCD YYMM format)
+                txtProdDate.Text = _rawData[0x60].ToString("X2") + _rawData[0x61].ToString("X2");
 
                 // 4. Single Byte Values
                 txtModifier.Text = _rawData[0x53].ToString();
@@ -490,7 +492,7 @@ namespace RFIDEditor
             return (i >= 0x1C && i <= 0x25) ||
                    (i >= 0x41 && i <= 0x44) ||
                    (i >= 0x48 && i <= 0x4B) ||
-                   (i >= 0x4C && i <= 0x4F);
+                   (i >= 0x4C && i <= 0x4D);
         }
 
         private void comboMaterial_SelectedIndexChanged(object sender, EventArgs e)
